@@ -1,0 +1,73 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: skyflow-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - skyflow-net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: skyflow-app-api
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-skyflowpass}
+      - DB_NAME=${DB_NAME:-skyflow_db}
+      - JWT_SECRET=${JWT_SECRET:-skyflow_secret_key_2024}
+      - FLIGHTAPI_KEY=${FLIGHTAPI_KEY:-6abe10cfe1ceafff6e5b16d3}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - skyflow-net
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: skyflow-app-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-skyflowpass}
+      POSTGRES_DB: ${DB_NAME:-skyflow_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-skyflow_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - skyflow-net
+
+volumes:
+  pgdata:
+    name: skyflow_pgdata
+
+networks:
+  skyflow-net:
+    name: skyflow_network
+    driver: bridge

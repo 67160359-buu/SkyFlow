@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyFlow - จองเที่ยวบินผ่านแชท</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #f1f5f9;
+    }
+
+    .qr {
+      display: grid;
+      grid-template-columns: repeat(21, 1fr);
+      width: 168px;
+      height: 168px;
+    }
+
+    .qr i {
+      display: block;
+    }
+
+    .msg-in {
+      animation: pop .25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .glass-header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 99px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
+
+  <!-- Header -->
+  <header
+    class="glass-header sticky top-0 z-40 border-b border-slate-200/80 py-3 px-4 md:px-8 flex justify-between items-center shadow-sm">
+    <div class="flex items-center space-x-3">
+      <div
+        class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white text-xl shadow-lg shadow-sky-200 font-bold">
+        ✈️
+      </div>
+      <div>
+        <h1 class="text-xl font-extrabold text-slate-900 tracking-tight leading-none">SkyFlow</h1>
+        <p class="text-[11px] text-slate-500 font-medium mt-0.5">ค้นหาเที่ยวบิน จองง่าย จ่ายสะดวก</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3">
+      <div
+        class="hidden sm:flex items-center space-x-2 bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>แชทระบบอัตโนมัติ</span>
+      </div>
+      <!-- ปุ่มเข้าสู่ระบบ / สมัครสมาชิก ตามรูปภาพ -->
+      <div id="authNavContainer" class="flex items-center gap-2">
+        <button onclick="openBookingsModal()" title="ตรวจสอบประวัติการจอง"
+          class="hidden md:flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200/90 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-xs">
+          <span>📋</span> <span>ประวัติการจอง</span>
+        </button>
+        <div class="flex items-center bg-[#1d6fe8] px-2.5 py-1.5 rounded-xl shadow-sm gap-2">
+          <button id="navLoginBtn" onclick="openAuthModal('login')"
+            class="text-white text-xs md:text-sm font-semibold border border-white/60 hover:bg-white/20 active:scale-95 px-3 py-1.5 rounded-lg transition cursor-pointer">เข้าสู่ระบบ</button>
+          <button id="navRegisterBtn" onclick="openAuthModal('register')"
+            class="text-white text-xs md:text-sm font-semibold border border-white/60 hover:bg-white/20 active:scale-95 px-3 py-1.5 rounded-lg transition cursor-pointer">สมัครสมาชิก</button>
+        </div>
+      </div>
+      <!-- สถานะเมื่อเข้าสู่ระบบแล้ว (มีปุ่มประวัติการจองและประวัติล็อกอิน) -->
+      <div id="userNavContainer"
+        class="hidden items-center bg-sky-50/90 border border-sky-200 p-1.5 rounded-2xl gap-1.5 text-xs">
+        <span class="text-sky-900 font-bold px-2" id="navUserName">👤 ผู้ใช้งาน</span>
+        <button onclick="openBookingsModal()" title="ดูประวัติการจองเที่ยวบิน"
+          class="bg-white hover:bg-sky-50 text-sky-700 font-semibold border border-sky-200/80 px-2.5 py-1 rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1">
+          <span>📋</span> <span class="hidden sm:inline">ประวัติการจอง</span>
+        </button>
+        <button onclick="openLoginLogsModal()" title="ดูประวัติการเข้าสู่ระบบ"
+          class="bg-white hover:bg-slate-50 text-slate-700 font-semibold border border-slate-200/80 px-2.5 py-1 rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1">
+          <span>🕒</span> <span class="hidden sm:inline">ประวัติล็อกอิน</span>
+        </button>
+        <button id="navLogoutBtn" onclick="handleLogout()"
+          class="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold border border-rose-200/80 px-2.5 py-1 rounded-xl transition cursor-pointer">ออกจากระบบ</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto w-full p-3 md:p-6 space-y-4 flex-1">
+
+    <!-- Stepper -->
+    <div
+      class="bg-white border border-slate-200/80 rounded-2xl p-2 shadow-sm grid grid-cols-5 gap-1.5 text-center text-[11px] md:text-xs font-bold">
+      <div id="s1" class="py-2 px-1 rounded-xl transition-all">1. ความต้องการ</div>
+      <div id="s2" class="py-2 px-1 rounded-xl transition-all">2. เลือกเที่ยวบิน</div>
+      <div id="s3" class="py-2 px-1 rounded-xl transition-all">3. ยืนยันการจอง</div>
+      <div id="s4" class="py-2 px-1 rounded-xl transition-all">4. ชำระเงิน</div>
+      <div id="s5" class="py-2 px-1 rounded-xl transition-all">5. เสร็จสิ้น</div>
+    </div>
+
+    <!-- CHAT VIEW -->
+    <section id="chat-view"
+      class="bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+      <!-- Chat Header -->
+      <div class="px-5 py-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-sm">
+            💬</div>
+          <div>
+            <h2 class="font-bold text-slate-800 text-sm">ผู้ช่วยค้นหาเที่ยวบิน</h2>
+            <p class="text-[11px] text-slate-400">ระบุปลายทาง ช่วงวันเดินทาง หรือเงื่อนไขที่ต้องการ</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Log Area -->
+      <div id="chat-log" class="p-4 md:p-6 space-y-4 h-[30rem] overflow-y-auto bg-slate-50/40"></div>
+
+      <!-- Controls & Fast Selection Bar -->
+      <div class="p-4 border-t border-slate-100 bg-white space-y-3">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-500 font-bold flex items-center gap-1">📍 เลือกจุดหมาย:</span>
+          <div class="relative flex-1 min-w-[200px]">
+            <input id="dest" list="airport-list" autocomplete="off"
+              placeholder="พิมพ์ชื่อเมือง หรือรหัสสนามบิน เช่น ภูเก็ต / HDY"
+              class="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 bg-slate-50 transition">
+            <datalist id="airport-list"></datalist>
+          </div>
+          <span id="dest-code"
+            class="px-3 py-2 rounded-xl font-mono font-bold bg-slate-100 text-slate-400 transition">---</span>
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+          <span class="text-slate-400 text-[11px] whitespace-nowrap">ตัวอย่าง:</span>
+          <button
+            class="chip whitespace-nowrap bg-slate-100 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 border border-slate-200 px-3 py-1.5 rounded-full text-slate-600 transition">สิงคโปร์
+            เช้า รวมกระเป๋า งบ 8000</button>
+          <button
+            class="chip whitespace-nowrap bg-slate-100 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 border border-slate-200 px-3 py-1.5 rounded-full text-slate-600 transition">ภูเก็ต
+            สุดสัปดาห์ งบ 2500</button>
+          <button
+            class="chip whitespace-nowrap bg-slate-100 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 border border-slate-200 px-3 py-1.5 rounded-full text-slate-600 transition">โซล
+            บินตรง</button>
+          <button
+            class="chip whitespace-nowrap bg-slate-100 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-200 border border-slate-200 px-3 py-1.5 rounded-full text-slate-600 transition">ไปโตเกียว
+            ธันวา บินตรง งบ 18,000</button>
+        </div>
+
+        <!-- Input Group -->
+        <div class="flex items-center gap-2 pt-1">
+          <input type="date" id="dep-date" title="วันเดินทาง"
+            class="border border-slate-200 rounded-2xl px-3 py-3 text-xs outline-none focus:border-sky-500 bg-slate-50 text-slate-700 font-medium">
+          <textarea id="chat-input" rows="1"
+            class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none resize-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100 transition"
+            placeholder="พิมพ์ข้อความค้นหาเที่ยวบิน..."></textarea>
+          <button id="send-btn"
+            class="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 active:scale-95 text-white font-bold px-6 py-3 rounded-2xl text-sm transition shadow-md shadow-sky-200 flex items-center justify-center shrink-0">
+            ส่ง ➔
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAYMENT VIEW -->
+    <section id="pay-view" class="hidden grid grid-cols-1 md:grid-cols-5 gap-5">
+      <div class="md:col-span-3 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">💳 ชำระเงิน</h2>
+          <button id="back-btn" class="text-xs text-slate-500 hover:text-slate-800 font-medium">←
+            กลับไปเลือกเที่ยวบิน</button>
+        </div>
+
+        <div class="space-y-3">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">ข้อมูลผู้ติดต่อ</p>
+          <input id="p-name"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+            placeholder="ชื่อ-นามสกุล (ตรงตามบัตรประชาชน/พาสปอร์ต)">
+          <div class="grid grid-cols-2 gap-2">
+            <input id="p-email" type="email"
+              class="border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+              placeholder="อีเมลสำหรับรับ e-Ticket">
+            <input id="p-phone"
+              class="border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+              placeholder="เบอร์โทรศัพท์">
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">เลือกช่องทางชำระเงิน</p>
+          <div class="grid grid-cols-3 gap-2 text-xs font-bold">
+            <button data-m="card" class="method p-3 rounded-xl border-2 text-center transition">💳<br><span
+                class="text-[11px]">บัตรเครดิต/เดบิต</span></button>
+            <button data-m="qr" class="method p-3 rounded-xl border-2 text-center transition">📱<br><span
+                class="text-[11px]">พร้อมเพย์ QR</span></button>
+            <button data-m="bank" class="method p-3 rounded-xl border-2 text-center transition">🏦<br><span
+                class="text-[11px]">โมบายแบงก์กิ้ง</span></button>
+          </div>
+        </div>
+
+        <div id="m-card" class="method-panel space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <input id="c-num" inputmode="numeric" maxlength="19"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 font-mono bg-white"
+            placeholder="หมายเลขบัตร 0000 0000 0000 0000">
+          <input id="c-holder"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 bg-white"
+            placeholder="ชื่อบนบัตร (ภาษาอังกฤษ)">
+          <div class="grid grid-cols-2 gap-2">
+            <input id="c-exp" maxlength="5"
+              class="border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 font-mono bg-white"
+              placeholder="MM/YY">
+            <input id="c-cvv" type="password" inputmode="numeric" maxlength="4"
+              class="border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 font-mono bg-white"
+              placeholder="CVV">
+          </div>
+        </div>
+
+        <div id="m-qr"
+          class="method-panel hidden text-center space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <div class="inline-block p-3 border border-slate-200 rounded-2xl bg-white shadow-sm">
+            <div id="qr" class="qr"></div>
+          </div>
+          <p class="text-xs text-slate-500">สแกน QR Code ด้วยแอปพลิเคชันธนาคารเพื่อชำระเงิน</p>
+          <p class="text-sm font-bold text-slate-800">ยอดชำระสุทธิ: ฿<span class="pay-total"></span></p>
+        </div>
+
+        <div id="m-bank" class="method-panel hidden space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <select id="b-bank"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 bg-white">
+            <option value="">เลือกธนาคารของคุณ</option>
+            <option>ธนาคารกสิกรไทย (K PLUS)</option>
+            <option>ธนาคารไทยพาณิชย์ (SCB Easy)</option>
+            <option>ธนาคารกรุงเทพ (Bualuang mBanking)</option>
+            <option>ธนาคารกรุงไทย (Krungthai NEXT)</option>
+            <option>ธนาคารกรุงศรี (KMA)</option>
+          </select>
+          <p class="text-xs text-slate-500">ระบบจะเชื่อมต่อไปยังแอปพลิเคชันธนาคารของคุณโดยอัตโนมัติ</p>
+        </div>
+
+        <p id="pay-error"
+          class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2.5">
+        </p>
+
+        <button id="pay-btn"
+          class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold py-3.5 rounded-2xl transition text-sm shadow-md shadow-emerald-200">
+          ยืนยันการชำระเงิน ฿<span class="pay-total"></span>
+        </button>
+        <p class="text-[11px] text-slate-400 text-center">🔒 ระบบจำลองการชำระเงินเพื่อการศึกษา ปลอดภัย
+          ไม่มีการเก็บข้อมูลจริง</p>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <aside class="md:col-span-2 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm h-fit space-y-4">
+        <h3 class="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">สรุปรายการเที่ยวบิน</h3>
+        <div id="order-summary"
+          class="bg-slate-50 rounded-2xl p-4 text-xs text-slate-600 space-y-2.5 border border-slate-100"></div>
+      </aside>
+    </section>
+
+    <!-- SUCCESS VIEW -->
+    <section id="done-view" class="hidden space-y-5 max-w-2xl mx-auto">
+      <div
+        class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-3xl p-8 text-center shadow-lg space-y-3">
+        <div
+          class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
+          🎉</div>
+        <h2 class="text-2xl font-black">ชำระเงินสำเร็จแล้ว!</h2>
+        <p class="text-xs text-emerald-100">เราได้ส่ง E-Ticket และใบเสร็จรับเงินไปยัง <span id="done-email"
+            class="font-semibold underline"></span> เรียบร้อยแล้ว</p>
+      </div>
+      <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <span class="text-xs text-slate-400 font-medium">รหัสอ้างอิงการจอง (Booking Ref)</span>
+          <span id="done-ref" class="font-mono font-black text-xl text-sky-600 bg-sky-50 px-3 py-1 rounded-xl"></span>
+        </div>
+        <div id="done-summary" class="text-xs text-slate-600 space-y-2.5"></div>
+      </div>
+      <div class="text-center pt-2">
+        <button id="home-btn"
+          class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-8 py-3.5 rounded-2xl transition shadow-md active:scale-95">กลับสู่หน้าหลัก
+          / ค้นหาเที่ยวบินใหม่</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Confirm Modal -->
+  <div id="confirm-modal"
+    class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-100 animate-pop">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-base text-slate-900">รายละเอียดการจอง</h3>
+        <button id="modal-close" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+      <div id="confirm-summary"
+        class="bg-slate-50 p-4 rounded-2xl text-xs space-y-2.5 text-slate-600 border border-slate-100"></div>
+      <button id="to-pay"
+        class="w-full bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold py-3.5 rounded-2xl transition text-sm shadow-md shadow-sky-200">ดำเนินการชำระเงิน
+        ➔</button>
+    </div>
+  </div>
+
+  <!-- Auth Modal (เข้าสู่ระบบ / สมัครสมาชิก) -->
+  <div id="auth-modal"
+    class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div
+      class="bg-white max-w-md w-full rounded-3xl p-6 md:p-8 shadow-2xl space-y-5 border border-slate-100 relative animate-pop">
+      <button onclick="closeAuthModal()"
+        class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">✕</button>
+
+      <div class="text-center">
+        <div
+          class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white text-2xl mx-auto shadow-md shadow-sky-200 mb-2">
+          ✈️</div>
+        <h3 id="authModalTitle" class="text-xl font-black text-slate-900 tracking-tight">เข้าสู่ระบบ SkyFlow</h3>
+        <p class="text-xs text-slate-500 mt-1">ยินดีต้อนรับสู่ระบบค้นหาและจองเที่ยวบิน</p>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold border border-slate-200/50">
+        <button id="modalTabLogin" onclick="switchAuthTab('login')"
+          class="flex-1 py-2 rounded-xl bg-white shadow-sm text-sky-600 transition cursor-pointer">เข้าสู่ระบบ</button>
+        <button id="modalTabRegister" onclick="switchAuthTab('register')"
+          class="flex-1 py-2 rounded-xl text-slate-500 transition hover:text-slate-700 cursor-pointer">สมัครสมาชิก</button>
+      </div>
+
+      <div id="authModalAlert" class="hidden p-3 rounded-xl text-xs font-semibold text-center transition"></div>
+
+      <!-- Login Form -->
+      <form id="modalLoginForm" onsubmit="handleModalLogin(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Username หรือ E-mail</label>
+          <input type="text" id="modalLoginUser" required placeholder="กรอก Username หรืออีเมล"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 transition">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="modalLoginPass" required placeholder="••••••••"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 transition">
+        </div>
+        <button type="submit" id="modalLoginSubmit"
+          class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl shadow-md shadow-sky-200 text-xs transition cursor-pointer">
+          เข้าสู่ระบบ ➔
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="modalRegForm" onsubmit="handleModalRegister(event)" class="space-y-3 hidden">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อ-นามสกุล</label>
+          <input type="text" id="modalRegName" required placeholder="สมชาย ใจดี"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 transition">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Username</label>
+          <input type="text" id="modalRegUsername" required placeholder="ตั้งชื่อผู้ใช้"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 transition">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">E-mail</label>
+          <input type="email" id="modalRegEmail" required placeholder="example@email.com"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 transition">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="modalRegPassword" required placeholder="อย่างน้อย 6 ตัวอักษร"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 transition">
+        </div>
+        <button type="submit" id="modalRegSubmit"
+          class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3 rounded-xl shadow-md shadow-emerald-200 text-xs transition cursor-pointer">
+          ยืนยันการสมัครสมาชิก
+        </button>
+      </form>
+
+      <div class="text-center pt-1 border-t border-slate-100">
+        <a href="/index.html" class="text-[11px] text-sky-600 hover:underline">เปิดหน้าต่างระบบสมาชิกแบบเต็มหน้าจอ
+          (index.html)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bookings History Modal (ประวัติการจอง) -->
+  <div id="bookings-modal"
+    class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div
+      class="bg-white max-w-2xl w-full rounded-3xl p-6 md:p-7 shadow-2xl space-y-4 border border-slate-100 relative animate-pop max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-lg">
+            📋</div>
+          <div>
+            <h3 class="font-bold text-base text-slate-900">ประวัติการจองเที่ยวบิน</h3>
+            <p class="text-xs text-slate-500">รายการเที่ยวบินทั้งหมดที่เคยจองในระบบ</p>
+          </div>
+        </div>
+        <button onclick="closeBookingsModal()"
+          class="text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">✕</button>
+      </div>
+
+      <!-- Quick Search by Ref -->
+      <div class="flex items-center gap-2">
+        <input id="searchBookingRef" type="text" placeholder="ค้นหาด้วยรหัสอ้างอิงการจอง เช่น SFXXXXXX"
+          class="flex-1 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition bg-slate-50">
+        <button onclick="searchBooking()"
+          class="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer shadow-xs">
+          ค้นหา
+        </button>
+        <button onclick="fetchMyBookings()" title="รีเฟรชข้อมูล"
+          class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer">
+          🔄
+        </button>
+      </div>
+
+      <!-- Bookings List Container -->
+      <div id="bookingsList" class="overflow-y-auto flex-1 space-y-3 pr-1 max-h-[55vh]">
+        <div class="text-center py-8 text-slate-400 text-xs">กำลังโหลดข้อมูล...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login History Modal (ประวัติล็อกอิน) -->
+  <div id="login-logs-modal"
+    class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div
+      class="bg-white max-w-xl w-full rounded-3xl p-6 md:p-7 shadow-2xl space-y-4 border border-slate-100 relative animate-pop max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">
+            🕒</div>
+          <div>
+            <h3 class="font-bold text-base text-slate-900">ประวัติการเข้าสู่ระบบ (Login Logs)</h3>
+            <p class="text-xs text-slate-500">บันทึกวันเวลาและอุปกรณ์ที่เข้าสู่ระบบของคุณ</p>
+          </div>
+        </div>
+        <button onclick="closeLoginLogsModal()"
+          class="text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">✕</button>
+      </div>
+
+      <!-- Login Logs Table Container -->
+      <div id="loginLogsList" class="overflow-y-auto flex-1 pr-1 max-h-[55vh]">
+        <div class="text-center py-8 text-slate-400 text-xs">กำลังโหลดข้อมูล...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- Config & Master Data ---------- */
+    const ORIGIN = 'BKK';
+    const AIRPORT_LIST = [
+      ['CNX', 'เชียงใหม่', 'Chiang Mai'], ['HKT', 'ภูเก็ต', 'Phuket'], ['KBV', 'กระบี่', 'Krabi'], ['HDY', 'หาดใหญ่|สงขลา', 'Hat Yai'],
+      ['CEI', 'เชียงราย', 'Chiang Rai'], ['KKC', 'ขอนแก่น', 'Khon Kaen'], ['UTH', 'อุดรธานี|อุดร', 'Udon Thani'], ['USM', 'เกาะสมุย|สมุย', 'Samui'],
+      ['URT', 'สุราษฎร์ธานี|สุราษฎร์', 'Surat Thani'], ['NST', 'นครศรีธรรมราช|นครศรี', 'Nakhon Si Thammarat'], ['UBP', 'อุบลราชธานี|อุบล', 'Ubon Ratchathani'],
+      ['TST', 'ตรัง', 'Trang'], ['PHS', 'พิษณุโลก', 'Phitsanulok'], ['LPT', 'ลำปาง', 'Lampang'], ['TDX', 'ตราด', 'Trat'], ['UTP', 'พัทยา|ระยอง|อู่ตะเภา', 'U-Tapao'],
+      ['DMK', 'ดอนเมือง', 'Don Mueang'],
+      ['NRT', 'โตเกียว|ญี่ปุ่น|นาริตะ', 'Tokyo'], ['HND', 'ฮาเนดะ', 'Haneda'], ['KIX', 'โอซาก้า|โอซากา', 'Osaka'], ['FUK', 'ฟุกุโอกะ', 'Fukuoka'],
+      ['CTS', 'ซัปโปโร|ฮอกไกโด', 'Sapporo'], ['NGO', 'นาโกย่า', 'Nagoya'], ['ICN', 'โซล|เกาหลี|อินชอน', 'Seoul'], ['PUS', 'ปูซาน', 'Busan'],
+      ['SIN', 'สิงคโปร์', 'Singapore'], ['KUL', 'กัวลาลัมเปอร์', 'Kuala Lumpur'], ['HKG', 'ฮ่องกง', 'Hong Kong'], ['TPE', 'ไทเป|ไต้หวัน', 'Taipei'],
+      ['PEK', 'ปักกิ่ง', 'Beijing'], ['PVG', 'เซี่ยงไฮ้', 'Shanghai'], ['CAN', 'กว่างโจว', 'Guangzhou'], ['SGN', 'โฮจิมินห์|ไซง่อน|เวียดนาม', 'Ho Chi Minh'],
+      ['HAN', 'ฮานอย', 'Hanoi'], ['DAD', 'ดานัง', 'Da Nang'], ['REP', 'เสียมเรียบ', 'Siem Reap'], ['PNH', 'พนมเปญ', 'Phnom Penh'], ['RGN', 'ย่างกุ้ง', 'Yangon'],
+      ['DPS', 'บาหลี', 'Bali'], ['CGK', 'จาการ์ตา', 'Jakarta'], ['MNL', 'มะนิลา', 'Manila'], ['DEL', 'เดลี', 'Delhi'], ['BOM', 'มุมไบ', 'Mumbai'],
+      ['DXB', 'ดูไบ', 'Dubai'], ['MLE', 'มัลดีฟส์|มัลดีฟ', 'Maldives'], ['IST', 'อิสตันบูล', 'Istanbul'], ['LHR', 'ลอนดอน', 'London'], ['CDG', 'ปารีส', 'Paris'],
+      ['FRA', 'แฟรงก์เฟิร์ต', 'Frankfurt'], ['SYD', 'ซิดนีย์', 'Sydney'], ['MEL', 'เมลเบิร์น', 'Melbourne'], ['LAX', 'ลอสแอนเจลิส', 'Los Angeles'], ['JFK', 'นิวยอร์ก', 'New York'],
+      ['ZRH', 'ซูริก|ซูริค|สวิตเซอร์แลนด์', 'Zurich'], ['AMS', 'อัมสเตอร์ดัม', 'Amsterdam'], ['FCO', 'โรม|อิตาลี', 'Rome'], ['MAD', 'มาดริด', 'Madrid']
+    ];
+
+    function resolveAirport(text) {
+      if (!text) return null;
+      const t = text.toLowerCase();
+      let best = null;
+      for (const [code, th, en] of AIRPORT_LIST) {
+        const names = [...th.split('|'), en];
+        for (const n of names) {
+          if (t.includes(n.toLowerCase()) && (!best || n.length > best.len)) best = { code, name: th.split('|')[0], len: n.length };
+        }
+        if (new RegExp('(^|[^A-Za-z])' + code + '([^A-Za-z]|$)', 'i').test(text) && (!best || 3 > best.len)) best = { code, name: th.split('|')[0], len: 3 };
+      }
+      const raw = text.trim();
+      if (!best && /^[A-Za-z]{3}$/.test(raw)) best = { code: raw.toUpperCase(), name: raw.toUpperCase(), len: 3 };
+      return best;
+    }
+
+    const MONTHS = ["มกรา", "กุมภา", "มีนา", "เมษา", "พฤษภา", "มิถุนา", "กรกฎา", "สิงหา", "กันยา", "ตุลา", "พฤศจิกา", "ธันวา"];
+
+    let flights = [], selected = null, method = 'card', booking = null;
+    let forcedAirport = null, lastSearchError = null;
+
+    const $ = id => document.getElementById(id);
+    const fmt = n => Number(n).toLocaleString('en-US');
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    function updateDestBadge() {
+      const ap = forcedAirport || resolveAirport($('dest').value);
+      const el = $('dest-code');
+      if (el) {
+        el.textContent = ap ? ap.code : '---';
+        el.className = 'px-3 py-2 rounded-xl font-mono font-bold transition ' + (ap ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-400');
+      }
+    }
+
+    async function ensureAirport() { return true; }
+
+    /* ---------- Stepper Controls ---------- */
+    function setStep(n) {
+      for (let i = 1; i <= 5; i++) {
+        $('s' + i).className = 'py-2 px-1 rounded-xl transition-all font-semibold ' +
+          (i < n ? 'bg-emerald-500 text-white shadow-sm' : i === n ? 'bg-sky-500 text-white shadow-md shadow-sky-100' : 'bg-slate-100 text-slate-400');
+      }
+    }
+    function showView(v) {
+      ['chat-view', 'pay-view', 'done-view'].forEach(id => $(id).classList.add('hidden')); $(v).classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ---------- Chat Engine ---------- */
+    function addMsg(role, html) {
+      const mine = role === 'user';
+      const row = document.createElement('div');
+      row.className = 'msg-in flex ' + (mine ? 'justify-end' : 'justify-start');
+      row.innerHTML = mine
+        ? `<div class="max-w-[85%] bg-sky-500 text-white rounded-2xl rounded-br-none px-4 py-3 text-xs md:text-sm font-medium shadow-sm">${esc(html)}</div>`
+        : `<div class="max-w-[95%] bg-white border border-slate-200/80 rounded-2xl rounded-bl-none px-4 py-3.5 text-xs md:text-sm text-slate-700 shadow-sm space-y-2">${html}</div>`;
+      $('chat-log').appendChild(row);
+      $('chat-log').scrollTop = $('chat-log').scrollHeight;
+      return row.firstElementChild;
+    }
+
+    async function sendMessage(text) {
+      text = (text ?? $('chat-input').value).trim();
+      if (!text) return;
+      $('chat-input').value = '';
+      addMsg('user', text);
+      setStep(2);
+      await ensureAirport(text);
+      const info = parseRequest(text);
+      if (!info.code) {
+        addMsg('bot', 'ยังไม่รู้จักจุดหมายนี้ค่ะ ลองเลือกจากรายการสนามบินในช่อง "จุดหมาย" หรือใช้รหัส 3 หลัก เช่น <b>NRT, HKT, SIN</b>');
+        setStep(1); return;
+      }
+      if (info.code === ORIGIN) { addMsg('bot', 'จุดหมายต้องไม่ใช่สนามบินต้นทาง (BKK) กรุณาเลือกจุดหมายปลายทางอื่นนะคะ'); setStep(1); return; }
+
+      const typing = addMsg('bot', '<div class="flex items-center gap-2 text-slate-500"><span class="animate-spin">⏳</span> กำลังค้นหาตารางและราคาเที่ยวบินล่าสุด...</div>');
+      try {
+        flights = await fetchFlights(info);
+        typing.parentElement.remove();
+        if (!flights.length) {
+          addMsg('bot', 'ไม่พบเที่ยวบินตามเงื่อนไข ลองปรับเปลี่ยนวันเดินทาง หรือปิดตัวเลือก "บินตรง" ดูนะคะ');
+          return;
+        }
+        const bubble = addMsg('bot', `
+      <div class="border-b border-slate-100 pb-2">
+        พบ <b>${flights.length}</b> เที่ยวบินไป <b>${esc(info.destination)}</b> (${info.date}) · ${info.budgetText}
+      </div>
+      <div class="flex items-center gap-1.5 pt-1 text-xs">
+        <span class="text-slate-400">เรียงตาม:</span>
+        <button data-sort="price" class="sortbtn bg-sky-50 text-sky-600 px-2.5 py-1 rounded-lg font-bold">💰 ราคาต่ำสุด</button>
+        <button data-sort="time" class="sortbtn bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-bold">⏰ เวลาออกเดินทาง</button>
+      </div>
+      <div class="results space-y-2.5 pt-2"></div>
+    `);
+
+        bubble.querySelectorAll('.sortbtn').forEach(b => b.onclick = () => renderResults(bubble, flights, b.dataset.sort));
+        renderResults(bubble, flights, 'price');
+      } catch (e) {
+        typing.parentElement.remove();
+        addMsg('bot', 'เกิดข้อผิดพลาดในการดึงข้อมูลเที่ยวบิน: <span class="text-rose-500 font-mono text-xs">(' + esc(e.message) + ')</span>');
+        setStep(1);
+      }
+    }
+
+    /* ---------- Render Flight Cards ---------- */
+    function renderResults(container, list, sortType) {
+      const box = container.querySelector('.results');
+      box.innerHTML = '';
+
+      const sorted = [...list].sort((a, b) => sortType === 'price' ? a.price - b.price : a.dep.localeCompare(b.dep));
+
+      sorted.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 p-3.5 rounded-2xl transition flex flex-col md:flex-row justify-between items-start md:items-center gap-3';
+        card.innerHTML = `
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-slate-900 text-sm">${esc(f.airline)}</span>
+          <span class="text-[11px] bg-slate-200/80 text-slate-600 px-2 py-0.5 rounded-md font-mono">${esc(f.code)}</span>
+          ${f.stops === 0 ? '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md font-bold">บินตรง</span>' : '<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md font-bold">ต่อเครื่อง</span>'}
+        </div>
+        <div class="text-xs text-slate-600 font-medium">
+          🛫 เวลา ${esc(f.dep)} - ${esc(f.arr)} น.
+        </div>
+      </div>
+      <div class="flex items-center justify-between md:justify-end w-full md:w-auto gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-200/60">
+        <div class="text-right">
+          <div class="text-sky-600 font-black text-base">฿${fmt(f.price)}</div>
+          ${f.over ? '<div class="text-[10px] text-amber-600 font-medium">เกินงบที่ระบุ</div>' : ''}
+        </div>
+        <button class="book-btn bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm">
+          เลือกจอง ➔
+        </button>
+      </div>
+    `;
+        card.querySelector('.book-btn').onclick = () => openConfirm(f);
+        box.appendChild(card);
+      });
+    }
+
+    /* ---------- Parsing Logic ---------- */
+    function parseRequest(prompt) {
+      const ap = resolveAirport(prompt) || forcedAirport || resolveAirport($('dest').value);
+      const destination = ap ? ap.name : null, code = ap ? ap.code : null;
+      if (ap && !forcedAirport) $('dest').value = `${ap.name} (${ap.code})`;
+      updateDestBadge();
+
+      let date = $('dep-date').value;
+      const mi = MONTHS.findIndex(x => prompt.includes(x));
+      if (mi >= 0) {
+        const now = new Date(); let y = now.getFullYear();
+        if (new Date(y, mi, 15) <= now) y++;
+        date = `${y}-${String(mi + 1).padStart(2, '0')}-15`;
+        $('dep-date').value = date;
+      }
+      const nums = [...prompt.replace(/,/g, '').matchAll(/\d+/g)].map(m => parseInt(m[0])).filter(n => n >= 500);
+      const budget = nums.length ? Math.max(...nums) : null;
+      return {
+        destination, code, date, budget, direct: prompt.includes('บินตรง'),
+        budgetText: budget ? `งบประมาณไม่เกิน ฿${fmt(budget)}` : 'ไม่จำกัดงบ'
+      };
+    }
+
+    /* ---------- Backend Fetch API ---------- */
+    async function fetchFlights(info) {
+      const url = `/api/flights?from=${ORIGIN}&to=${info.code}&date=${info.date}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      if (data.flights && data.flights.length > 0) {
+        let list = data.flights.map(f => ({
+          ...f,
+          route: `${ORIGIN} ➔ ${info.destination} (${info.code})`,
+          over: info.budget ? f.price > info.budget : false
+        }));
+        if (info.direct) list = list.filter(f => f.stops === 0);
+        return list;
+      }
+      return [];
+    }
+
+    /* ---------- Modals & Payment Logic ---------- */
+    const rows = (f, totalLabel = 'ราคารวมสุทธิ:') => `
+  <div class="flex justify-between"><span>สายการบิน:</span><strong class="text-slate-800">${esc(f.airline)} (${esc(f.code)})</strong></div>
+  <div class="flex justify-between"><span>เส้นทาง:</span><strong class="text-slate-800">${esc(f.route)}</strong></div>
+  <div class="flex justify-between"><span>เวลาเดินทาง:</span><strong class="text-slate-800">${esc(f.dep)} - ${esc(f.arr)} น.</strong></div>
+  <div class="flex justify-between border-t border-slate-200/80 pt-2 text-xs"><span>${totalLabel}</span><strong class="text-sky-600 text-sm">฿${fmt(f.price)}</strong></div>`;
+
+    function openConfirm(f) {
+      selected = f; setStep(3);
+      $('confirm-summary').innerHTML = rows(f); $('confirm-modal').classList.remove('hidden');
+    }
+    function closeConfirm() { $('confirm-modal').classList.add('hidden'); setStep(2); }
+
+    function goPayment() {
+      $('confirm-modal').classList.add('hidden'); $('order-summary').innerHTML = rows(selected);
+      document.querySelectorAll('.pay-total').forEach(e => e.textContent = fmt(selected.price));
+      $('pay-error').classList.add('hidden');
+      drawQR(); setMethod('card'); setStep(4); showView('pay-view');
+    }
+
+    function setMethod(m) {
+      method = m;
+      document.querySelectorAll('.method').forEach(b =>
+        b.className = 'method p-3 rounded-xl border-2 text-center transition ' + (b.dataset.m === m ? 'border-sky-500 bg-sky-50 text-sky-700' : 'border-slate-200 text-slate-500 hover:border-slate-300'));
+      document.querySelectorAll('.method-panel').forEach(p => p.classList.add('hidden'));
+      $('m-' + m).classList.remove('hidden');
+    }
+
+    function drawQR() {
+      const n = 21, q = $('qr'); q.innerHTML = '';
+      const corners = [[0, 0], [n - 7, 0], [0, n - 7]];
+      const finder = (x, y) => corners.some(([fx, fy]) => x >= fx && x < fx + 7 && y >= fy && y < fy + 7 &&
+        (x === fx || x === fx + 6 || y === fy || y === fy + 6 || (x >= fx + 2 && x <= fx + 4 && y >= fy + 2 && y <= fy + 4)));
+      const blank = (x, y) => corners.some(([fx, fy]) => x >= fx - 1 && x <= fx + 7 && y >= fy - 1 && y <= fy + 7);
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+        const on = finder(x, y) || (!blank(x, y) && Math.random() > 0.5);
+        q.insertAdjacentHTML('beforeend', `<i style="background:${on ? '#0f172a' : '#fff'}"></i>`);
+      }
+    }
+
+    function showErr(msg) { const e = $('pay-error'); e.textContent = msg; e.classList.remove('hidden'); }
+
+    function validate() {
+      if (!$('p-name').value.trim()) return 'กรุณากรอกชื่อ-นามสกุลผู้จอง';
+      if (!/^\S+@\S+\.\S+$/.test($('p-email').value.trim())) return 'รูปแบบอีเมลไม่ถูกต้อง';
+      if (!/^[0-9\-\s+]{9,15}$/.test($('p-phone').value.trim())) return 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง';
+      if (method === 'card') {
+        if (!/^\d{15,16}$/.test($('c-num').value.replace(/\s/g, ''))) return 'หมายเลขบัตรต้องมี 15-16 หลัก';
+        if (!$('c-holder').value.trim()) return 'กรุณากรอกชื่อบนบัตร';
+        const m = $('c-exp').value.match(/^(\d{2})\/(\d{2})$/);
+        if (!m || +m[1] < 1 || +m[1] > 12) return 'วันหมดอายุไม่ถูกต้อง (MM/YY)';
+        const now = new Date(), y = 2000 + +m[2];
+        if (y < now.getFullYear() || (y === now.getFullYear() && +m[1] < now.getMonth() + 1)) return 'บัตรหมดอายุแล้ว';
+        if (!/^\d{3,4}$/.test($('c-cvv').value)) return 'CVV ต้องมี 3-4 หลัก';
+      }
+      if (method === 'bank' && !$('b-bank').value) return 'กรุณาเลือกธนาคาร';
+      return '';
+    }
+
+    function pay() {
+      const err = validate();
+      if (err) return showErr(err);
+      $('pay-error').classList.add('hidden');
+      const btn = $('pay-btn'); btn.disabled = true; btn.classList.add('opacity-60');
+      btn.textContent = 'กำลังดำเนินการชำระเงิน...';
+      setTimeout(async () => {
+        const names = { card: 'บัตรเครดิต/เดบิต', qr: 'พร้อมเพย์ QR', bank: 'โมบายแบงก์กิ้ง' };
+        booking = { ref: 'SF' + Math.random().toString(36).slice(2, 8).toUpperCase(), method: names[method] };
+        $('done-ref').textContent = booking.ref;
+        $('done-email').textContent = $('p-email').value.trim(); $('done-summary').innerHTML =
+          `<div class="flex justify-between"><span>ผู้โดยสาร:</span><strong>${esc($('p-name').value.trim())}</strong></div>` +
+          rows(selected, 'ชำระแล้ว:') +
+          `<div class="flex justify-between"><span>วิธีชำระเงิน:</span><strong>${booking.method}</strong></div>`;
+        btn.disabled = false; btn.classList.remove('opacity-60');
+        btn.innerHTML = 'ยืนยันการชำระเงิน ฿<span class="pay-total">' + fmt(selected.price) + '</span>';
+        setStep(5); showView('done-view');
+
+        // บันทึกประวัติการจองลงฐานข้อมูล (POST /api/bookings)
+        const bookingRecord = {
+          bookingRef: booking.ref,
+          passengerName: $('p-name').value.trim(),
+          passengerEmail: $('p-email').value.trim(),
+          passengerPhone: $('p-phone').value.trim(),
+          airline: selected.airline,
+          flightCode: selected.code,
+          route: selected.route,
+          depTime: selected.dep,
+          arrTime: selected.arr,
+          totalPrice: selected.price,
+          paymentMethod: booking.method
+        };
+
+        try {
+          const token = localStorage.getItem('token') || localStorage.getItem('sf_token');
+          const headers = { 'Content-Type': 'application/json' };
+          if (token) headers['Authorization'] = 'Bearer ' + token;
+          await fetch('/api/bookings', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(bookingRecord)
+          });
+        } catch (err) {
+          console.error('Error saving booking to server:', err);
+        }
+
+        try {
+          const cached = JSON.parse(localStorage.getItem('sf_bookings') || '[]');
+          cached.unshift({ ...bookingRecord, created_at: new Date().toISOString() });
+          localStorage.setItem('sf_bookings', JSON.stringify(cached.slice(0, 50)));
+        } catch (e) { }
+      }, 1200);
+    }
+
+    function greet() {
+      addMsg('bot', 'สวัสดีค่ะ 👋 ยินดีต้อนรับสู่ SkyFlow ค้นหาตั๋วเครื่องบินราคาประหยัด<br>ลองพิมพ์ เช่น <i>"ไปโตเกียว ธันวา บินตรง รวมกระเป๋า งบ 18,000"</i> ได้เลยค่ะ');
+    }
+
+    function resetAll() {
+      selected = null; flights = []; forcedAirport = null;
+      document.querySelectorAll('#pay-view input, #pay-view select').forEach(i => i.value = '');
+      if ($('dest')) $('dest').value = '';
+      updateDestBadge();
+      $('chat-log').innerHTML = '';
+      greet(); setStep(1); showView('chat-view');
+    }
+
+    /* ---------- Setup Events ---------- */
+    const dl = $('airport-list');
+    if (dl) {
+      AIRPORT_LIST.forEach(([code, th, en]) => {
+        const opt = document.createElement('option');
+        opt.value = `${th.split('|')[0]} (${code})`;
+        opt.label = `${en} - ${code}`;
+        dl.appendChild(opt);
+      });
+    }
+
+    $('send-btn').onclick = () => sendMessage(); $('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+    document.querySelectorAll('.chip').forEach(c => c.onclick = () => sendMessage(c.textContent));
+    $('modal-close').onclick = closeConfirm;
+    $('to-pay').onclick = goPayment;
+    $('back-btn').onclick = () => { setStep(2); showView('chat-view'); };
+    document.querySelectorAll('.method').forEach(b => b.onclick = () => setMethod(b.dataset.m));
+    $('pay-btn').onclick = pay;
+    $('home-btn').onclick = resetAll;
+    if ($('dest')) $('dest').addEventListener('input', updateDestBadge); $('c-num').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()); $('c-exp').addEventListener('input', e => { let v = e.target.value.replace(/\D/g, '').slice(0, 4); if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2); e.target.value = v; });
+
+    {
+      const d = new Date();
+      const min = d.toISOString().slice(0, 10);
+      d.setDate(d.getDate() + 30);
+      $('dep-date').min = min;
+      $('dep-date').value = d.toISOString().slice(0, 10);
+    }
+
+    greet();
+    setStep(1);
+
+    /* ---------- Auth Integration ---------- */
+    function getStoredUser() {
+      try {
+        const raw = localStorage.getItem('user') || localStorage.getItem('sf_user');
+        if (raw) return JSON.parse(raw);
+        const token = localStorage.getItem('token') || localStorage.getItem('sf_token');
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          return { username: payload.email ? payload.email.split('@')[0] : 'User', email: payload.email };
+        }
+      } catch (e) { }
+      return null;
+    }
+
+    function updateNavAuth() {
+      const u = getStoredUser();
+      const token = localStorage.getItem('token') || localStorage.getItem('sf_token');
+      const authBox = document.getElementById('authNavContainer');
+      const userBox = document.getElementById('userNavContainer');
+      const nameLabel = document.getElementById('navUserName');
+      if (token && u) {
+        if (authBox) authBox.classList.add('hidden');
+        if (userBox) {
+          userBox.classList.remove('hidden');
+          userBox.classList.add('flex');
+        }
+        if (nameLabel) nameLabel.textContent = `👤 ${u.name || u.username || 'สมาชิก'}`;
+        const pName = document.getElementById('p-name');
+        const pEmail = document.getElementById('p-email');
+        if (pName && !pName.value && u.name) pName.value = u.name;
+        if (pEmail && !pEmail.value && u.email) pEmail.value = u.email;
+      } else {
+        if (authBox) authBox.classList.remove('hidden');
+        if (userBox) {
+          userBox.classList.add('hidden');
+          userBox.classList.remove('flex');
+        }
+      }
+    }
+
+    function openAuthModal(mode) {
+      const modal = document.getElementById('auth-modal');
+      if (modal) modal.classList.remove('hidden');
+      switchAuthTab(mode);
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('auth-modal');
+      if (modal) modal.classList.add('hidden');
+      const alertBox = document.getElementById('authModalAlert');
+      if (alertBox) alertBox.classList.add('hidden');
+    }
+
+    function switchAuthTab(tab) {
+      const isLogin = tab === 'login';
+      const loginForm = document.getElementById('modalLoginForm');
+      const regForm = document.getElementById('modalRegForm');
+      const tabLogin = document.getElementById('modalTabLogin');
+      const tabReg = document.getElementById('modalTabRegister');
+      const title = document.getElementById('authModalTitle');
+      const alertBox = document.getElementById('authModalAlert');
+      if (alertBox) alertBox.classList.add('hidden');
+
+      if (loginForm) loginForm.classList.toggle('hidden', !isLogin);
+      if (regForm) regForm.classList.toggle('hidden', isLogin);
+      if (title) title.textContent = isLogin ? 'เข้าสู่ระบบ SkyFlow' : 'สมัครสมาชิก SkyFlow';
+
+      const activeClass = "flex-1 py-2 rounded-xl bg-white shadow-sm text-sky-600 transition cursor-pointer";
+      const inactiveClass = "flex-1 py-2 rounded-xl text-slate-500 transition hover:text-slate-700 cursor-pointer";
+      if (tabLogin) tabLogin.className = isLogin ? activeClass : inactiveClass;
+      if (tabReg) tabReg.className = !isLogin ? activeClass : inactiveClass;
+    }
+
+    function showAuthAlert(msg, isErr = false) {
+      const alertBox = document.getElementById('authModalAlert');
+      if (!alertBox) return;
+      alertBox.className = `p-3 rounded-xl text-xs font-semibold text-center transition ${isErr ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+        }`;
+      alertBox.textContent = msg;
+      alertBox.classList.remove('hidden');
+    }
+
+    async function handleModalLogin(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('modalLoginSubmit');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'กำลังเข้าสู่ระบบ...'; }
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('modalLoginUser').value.trim(),
+            password: document.getElementById('modalLoginPass').value
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('token', data.token);
+          if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+          showAuthAlert('เข้าสู่ระบบสำเร็จ!');
+          setTimeout(() => {
+            closeAuthModal();
+            updateNavAuth();
+          }, 700);
+        } else {
+          showAuthAlert(data.message || 'Username หรือ Password ไม่ถูกต้อง', true);
+        }
+      } catch (err) {
+        showAuthAlert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', true);
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'เข้าสู่ระบบ ➔'; }
+      }
+    }
+
+    async function handleModalRegister(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('modalRegSubmit');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'กำลังสมัครสมาชิก...'; }
+      try {
+        const res = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('modalRegName').value.trim(),
+            username: document.getElementById('modalRegUsername').value.trim(),
+            email: document.getElementById('modalRegEmail').value.trim(),
+            password: document.getElementById('modalRegPassword').value
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showAuthAlert('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
+          setTimeout(() => switchAuthTab('login'), 1000);
+        } else {
+          showAuthAlert(data.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก', true);
+        }
+      } catch (err) {
+        showAuthAlert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', true);
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'ยืนยันการสมัครสมาชิก'; }
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('sf_token');
+      localStorage.removeItem('sf_user');
+      updateNavAuth();
+    }
+
+    /* ---------- Booking History & Login Logs Modal Logic ---------- */
+    async function openBookingsModal() {
+      const modal = document.getElementById('bookings-modal');
+      if (modal) modal.classList.remove('hidden');
+      await fetchMyBookings();
+    }
+
+    function closeBookingsModal() {
+      const modal = document.getElementById('bookings-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function fetchMyBookings() {
+      const container = document.getElementById('bookingsList');
+      if (!container) return;
+      container.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs"><span class="animate-spin inline-block mr-1">⏳</span> กำลังโหลดข้อมูลการจอง...</div>';
+
+      let serverBookings = [];
+      const token = localStorage.getItem('token') || localStorage.getItem('sf_token');
+
+      if (token) {
+        try {
+          const res = await fetch('/api/my-bookings', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            serverBookings = data.bookings || [];
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const localBookings = JSON.parse(localStorage.getItem('sf_bookings') || '[]');
+      const map = new Map();
+      serverBookings.forEach(b => map.set(b.booking_ref || b.bookingRef, b));
+      localBookings.forEach(b => {
+        const key = b.booking_ref || b.bookingRef;
+        if (!map.has(key)) map.set(key, b);
+      });
+      const allBookings = Array.from(map.values()).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      if (allBookings.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 space-y-2">
+            <div class="text-3xl">✈️</div>
+            <p class="font-bold text-slate-700 text-sm">ยังไม่มีประวัติการจองเที่ยวบิน</p>
+            <p class="text-xs text-slate-400">เมื่อคุณทำการจองเที่ยวบิน รายการจองจะแสดงที่นี่</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = allBookings.map(b => {
+        const ref = b.booking_ref || b.bookingRef || 'SF---';
+        const name = b.passenger_name || b.passengerName || '-';
+        const airline = b.airline || '-';
+        const code = b.flight_code || b.flightCode || '';
+        const route = b.route || '-';
+        const dep = b.dep_time || b.depTime || '';
+        const arr = b.arr_time || b.arrTime || '';
+        const price = b.total_price || b.totalPrice || 0;
+        const method = b.payment_method || b.paymentMethod || '-';
+        const dateStr = b.created_at ? new Date(b.created_at).toLocaleString('th-TH') : '-';
+
+        return `
+          <div class="bg-slate-50 hover:bg-slate-100/70 border border-slate-200/80 rounded-2xl p-4 transition space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-xs bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-lg">${esc(ref)}</span>
+                <span class="text-[11px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-md">✓ ชำระแล้ว</span>
+              </div>
+              <span class="text-[11px] text-slate-400 font-medium">${esc(dateStr)}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+              <div>
+                <p class="font-bold text-slate-800">${esc(airline)} <span class="font-mono text-slate-500 font-normal">(${esc(code)})</span></p>
+                <p class="text-slate-600 mt-0.5">🛫 ${esc(route)}</p>
+                ${dep ? `<p class="text-slate-500 mt-0.5">⏰ เวลาเดินทาง: ${esc(dep)} - ${esc(arr)} น.</p>` : ''}
+              </div>
+              <div class="md:text-right space-y-1">
+                <p class="text-slate-500">ผู้โดยสาร: <strong class="text-slate-700">${esc(name)}</strong></p>
+                <p class="text-slate-500">วิธีชำระเงิน: <span class="font-medium text-slate-700">${esc(method)}</span></p>
+                <p class="font-black text-sky-600 text-sm">฿${fmt(price)}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function searchBooking() {
+      const query = (document.getElementById('searchBookingRef').value || '').trim().toUpperCase();
+      if (!query) return fetchMyBookings();
+      const container = document.getElementById('bookingsList');
+      container.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs"><span class="animate-spin inline-block mr-1">⏳</span> กำลังค้นหา...</div>';
+      try {
+        const res = await fetch('/api/bookings/' + encodeURIComponent(query));
+        if (!res.ok) throw new Error('ไม่พบรหัสการจองนี้');
+        const data = await res.json();
+        const b = data.booking;
+        container.innerHTML = `
+          <div class="bg-sky-50/60 border border-sky-200 rounded-2xl p-4 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-sky-200/60 pb-2">
+              <span class="font-mono font-bold text-xs bg-sky-600 text-white px-2.5 py-0.5 rounded-lg">${esc(b.booking_ref)}</span>
+              <span class="text-[11px] text-slate-500">${new Date(b.created_at).toLocaleString('th-TH')}</span>
+            </div>
+            <div class="text-xs space-y-1 text-slate-700">
+              <p><strong>สายการบิน:</strong> ${esc(b.airline)} (${esc(b.flight_code)})</p>
+              <p><strong>เส้นทาง:</strong> ${esc(b.route)}</p>
+              <p><strong>เวลา:</strong> ${esc(b.dep_time)} - ${esc(b.arr_time)} น.</p>
+              <p><strong>ผู้โดยสาร:</strong> ${esc(b.passenger_name)} (${esc(b.passenger_email)})</p>
+              <p><strong>ยอดชำระ:</strong> <span class="text-sky-600 font-bold">฿${fmt(b.total_price)}</span> (${esc(b.payment_method)})</p>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = `<div class="text-center py-8 text-rose-500 text-xs font-semibold">❌ ${esc(err.message)}</div>`;
+      }
+    }
+
+    async function openLoginLogsModal() {
+      const modal = document.getElementById('login-logs-modal');
+      if (modal) modal.classList.remove('hidden');
+      await fetchMyLogins();
+    }
+
+    function closeLoginLogsModal() {
+      const modal = document.getElementById('login-logs-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function fetchMyLogins() {
+      const container = document.getElementById('loginLogsList');
+      if (!container) return;
+      const token = localStorage.getItem('token') || localStorage.getItem('sf_token');
+
+      if (!token) {
+        container.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">กรุณาเข้าสู่ระบบเพื่อดูประวัติการเข้าสู่ระบบของคุณ</div>';
+        return;
+      }
+
+      container.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs"><span class="animate-spin inline-block mr-1">⏳</span> กำลังโหลดประวัติการเข้าสู่ระบบ...</div>';
+
+      try {
+        const res = await fetch('/api/my-logins', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('ไม่สามารถดึงข้อมูลได้');
+        const data = await res.json();
+        const logs = data.logs || [];
+
+        if (logs.length === 0) {
+          container.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">ไม่พบประวัติการเข้าสู่ระบบ</div>';
+          return;
+        }
+
+        container.innerHTML = `
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-500 font-bold">
+                <th class="py-2.5 px-3">วันและเวลา</th>
+                <th class="py-2.5 px-3">สถานะ</th>
+                <th class="py-2.5 px-3">IP Address</th>
+                <th class="py-2.5 px-3">อุปกรณ์ / เบราว์เซอร์</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${logs.map(l => {
+          const isSuccess = l.status === 'SUCCESS';
+          const dateStr = l.login_time ? new Date(l.login_time).toLocaleString('th-TH') : '-';
+          const uaShort = (l.user_agent || 'Unknown').slice(0, 35) + (l.user_agent && l.user_agent.length > 35 ? '...' : '');
+          return `
+                  <tr class="hover:bg-slate-50 transition">
+                    <td class="py-2.5 px-3 text-slate-700 whitespace-nowrap">${esc(dateStr)}</td>
+                    <td class="py-2.5 px-3">
+                      <span class="inline-block px-2 py-0.5 rounded-md font-bold text-[10px] ${isSuccess ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                        ${isSuccess ? '✓ สำเร็จ' : '✕ ล้มเหลว'}
+                      </span>
+                    </td>
+                    <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600">${esc(l.ip_address || '-')}</td>
+                    <td class="py-2.5 px-3 text-[11px] text-slate-500" title="${esc(l.user_agent || '')}">${esc(uaShort)}</td>
+                  </tr>
+                `;
+        }).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (err) {
+        container.innerHTML = `<div class="text-center py-8 text-rose-500 text-xs">เกิดข้อผิดพลาด: ${esc(err.message)}</div>`;
+      }
+    }
+
+    updateNavAuth();
+  </script>
+</body>
+
+</html>
