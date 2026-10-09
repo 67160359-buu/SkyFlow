@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const { AIRLINES, generate200Flights } = require('./airlines-data');
 
 const app = express();
 
@@ -99,7 +100,61 @@ async function initDB() {
         );
       `);
 
-      console.log('✅ Database connected and all tables initialized (users, login_logs, bookings)');
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS airlines (
+          id SERIAL PRIMARY KEY,
+          code VARCHAR(10) UNIQUE NOT NULL,
+          name VARCHAR(100) NOT NULL,
+          country VARCHAR(100) NOT NULL,
+          rating DECIMAL(2,1) DEFAULT 4.5
+        );
+      `);
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS flights (
+          id SERIAL PRIMARY KEY,
+          airline_code VARCHAR(10) NOT NULL,
+          airline_name VARCHAR(100) NOT NULL,
+          flight_code VARCHAR(20) NOT NULL,
+          origin VARCHAR(10) NOT NULL,
+          destination VARCHAR(10) NOT NULL,
+          dep_time VARCHAR(10) NOT NULL,
+          arr_time VARCHAR(10) NOT NULL,
+          duration INT NOT NULL,
+          stops INT DEFAULT 0,
+          price DECIMAL(10,2) NOT NULL,
+          aircraft VARCHAR(50),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // Seed 200 Airlines if table is empty
+      const airCountRes = await pool.query('SELECT COUNT(*) FROM airlines');
+      if (parseInt(airCountRes.rows[0].count, 10) === 0) {
+        for (const a of AIRLINES) {
+          await pool.query(
+            'INSERT INTO airlines (code, name, country, rating) VALUES ($1, $2, $3, $4) ON CONFLICT (code) DO NOTHING',
+            [a.code, a.name, a.country, a.rating]
+          );
+        }
+        console.log('✅ Seeded 200 airlines into PostgreSQL database');
+      }
+
+      // Seed 200 Flights if table is empty
+      const flightCountRes = await pool.query('SELECT COUNT(*) FROM flights');
+      if (parseInt(flightCountRes.rows[0].count, 10) === 0) {
+        const seedFlights = generate200Flights('BKK', 'SIN');
+        for (const f of seedFlights) {
+          await pool.query(
+            `INSERT INTO flights (airline_code, airline_name, flight_code, origin, destination, dep_time, arr_time, duration, stops, price, aircraft)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+            [f.airlineCode, f.airline, f.code, f.from, f.to, f.dep, f.arr, f.duration, f.stops, f.price, f.aircraft]
+          );
+        }
+        console.log('✅ Seeded 200 flights into PostgreSQL database');
+      }
+
+      console.log('✅ Database connected and all tables initialized (users, login_logs, bookings, airlines, flights)');
       break;
     } catch (err) {
       console.error(`⚠️ Database connection error: ${err.message}. Retrying... (${retries} left)`);
