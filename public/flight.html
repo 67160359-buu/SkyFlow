@@ -89,6 +89,10 @@
       </div>
       <!-- ปุ่มเข้าสู่ระบบ / สมัครสมาชิก ตามรูปภาพ -->
       <div id="authNavContainer" class="flex items-center gap-2">
+        <button onclick="openFlightsModal()" title="ดูตาราง 200 เที่ยวบินยอดนิยมทั่วโลก"
+          class="flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200/90 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-xs">
+          <span>🛫</span> <span>200 เที่ยวบิน</span>
+        </button>
         <button onclick="openAirlinesModal()" title="ดูทำเนียบ 200 สายการบินพันธมิตร"
           class="flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200/90 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-xs">
           <span>✈️</span> <span>200 สายการบิน</span>
@@ -108,6 +112,10 @@
       <div id="userNavContainer"
         class="hidden items-center bg-sky-50/90 border border-sky-200 p-1.5 rounded-2xl gap-1.5 text-xs">
         <span class="text-sky-900 font-bold px-2" id="navUserName">👤 ผู้ใช้งาน</span>
+        <button onclick="openFlightsModal()" title="ดูตาราง 200 เที่ยวบินยอดนิยมทั่วโลก"
+          class="bg-white hover:bg-sky-50 text-sky-700 font-semibold border border-sky-200/80 px-2.5 py-1 rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1">
+          <span>🛫</span> <span class="hidden sm:inline">200 เที่ยวบิน</span>
+        </button>
         <button onclick="openAirlinesModal()" title="ดูทำเนียบ 200 สายการบินพันธมิตร"
           class="bg-white hover:bg-sky-50 text-sky-700 font-semibold border border-sky-200/80 px-2.5 py-1 rounded-xl shadow-xs transition cursor-pointer flex items-center gap-1">
           <span>✈️</span> <span class="hidden sm:inline">200 สายการบิน</span>
@@ -479,6 +487,64 @@
       <!-- Login Logs Table Container -->
       <div id="loginLogsList" class="overflow-y-auto flex-1 pr-1 max-h-[55vh]">
         <div class="text-center py-8 text-slate-400 text-xs">กำลังโหลดข้อมูล...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 200 Flights Directory Modal (ทำเนียบ 200 เที่ยวบินยอดนิยม) -->
+  <div id="flights-modal"
+    class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div
+      class="bg-white max-w-5xl w-full rounded-3xl p-6 md:p-7 shadow-2xl space-y-4 border border-slate-100 relative animate-pop max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-sky-200">
+            🛫</div>
+          <div>
+            <h3 class="font-bold text-base text-slate-900">ตาราง 200 เที่ยวบินยอดนิยม (200 Flights Directory)</h3>
+            <p class="text-xs text-slate-500">เที่ยวบินครอบคลุม 200 สายการบินพันธมิตรทั่วโลก บินตรงและต่อเครื่อง ค้นหา กรอง และเลือกจองได้ทันที</p>
+          </div>
+        </div>
+        <button onclick="closeFlightsModal()"
+          class="text-slate-400 hover:text-slate-600 text-xl font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">✕</button>
+      </div>
+
+      <!-- Search & Filters Container -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <div class="relative flex-1">
+          <input id="searchFlightInput" type="text" oninput="filterFlightsDirectory()"
+            placeholder="ค้นหาตามรหัสเที่ยวบิน (เช่น TG 117), สายการบิน หรือเมืองปลายทาง (โตเกียว, สิงคโปร์, ภูเก็ต)..."
+            class="w-full border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition bg-slate-50">
+          <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+        </div>
+
+        <select id="filterRegionSelect" onchange="filterFlightsDirectory()"
+          class="border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none bg-slate-50 text-slate-700 font-medium cursor-pointer">
+          <option value="all">🌐 ปลายทางทั้งหมด</option>
+          <option value="domestic">🇹🇭 เที่ยวบินในประเทศ</option>
+          <option value="japan">🇯🇵 ญี่ปุ่น (Tokyo, Osaka, etc.)</option>
+          <option value="korea">🇰🇷 เกาหลีใต้ (Seoul, Busan)</option>
+          <option value="asia">🌏 เอเชีย (Singapore, HK, etc.)</option>
+          <option value="europe">🇪🇺 ยุโรป (London, Paris, etc.)</option>
+          <option value="mideast">🕌 ตะวันออกกลาง (Dubai)</option>
+          <option value="oceania">🦘 โอเชียเนีย (Sydney, Mel)</option>
+        </select>
+
+        <select id="filterStopsSelect" onchange="filterFlightsDirectory()"
+          class="border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none bg-slate-50 text-slate-700 font-medium cursor-pointer">
+          <option value="all">✈️ ทุกประเภทเที่ยวบิน</option>
+          <option value="direct">🟢 บินตรงเท่านั้น</option>
+          <option value="transit">🟡 ต่อเครื่อง</option>
+        </select>
+
+        <span id="flightCountBadge" class="bg-sky-50 text-sky-700 font-bold px-3 py-2 rounded-xl text-xs whitespace-nowrap text-center">
+          200 เที่ยวบิน
+        </span>
+      </div>
+
+      <!-- Flights Cards Grid Container -->
+      <div id="flightsGrid" class="overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 pr-1 max-h-[60vh]">
+        <!-- Dynamically rendered via JS -->
       </div>
     </div>
   </div>
@@ -1370,6 +1436,138 @@
       );
       renderAirlinesGrid(filtered);
     }
+
+    /* ---------- 200 Flights Directory Modal Logic ---------- */
+    let allFlightsCache = [];
+
+    async function loadFlightsDirectory() {
+      if (allFlightsCache.length > 0) return allFlightsCache;
+      try {
+        const res = await fetch('/api/flights/all');
+        if (res.ok) {
+          const data = await res.json();
+          allFlightsCache = data.flights || [];
+        }
+      } catch (e) {
+        console.warn('Failed to load flights master catalog:', e);
+      }
+      return allFlightsCache;
+    }
+
+    async function openFlightsModal() {
+      const modal = $('flights-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      const list = await loadFlightsDirectory();
+      renderFlightsGrid(list);
+    }
+
+    function closeFlightsModal() {
+      const modal = $('flights-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderFlightsGrid(list) {
+      const grid = $('flightsGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      if ($('flightCountBadge')) $('flightCountBadge').textContent = list.length + ' เที่ยวบิน';
+
+      if (list.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 text-xs">ไม่พบเที่ยวบินตามเงื่อนไขที่ค้นหา</div>';
+        return;
+      }
+
+      list.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 hover:bg-sky-50/60 border border-slate-200/80 hover:border-sky-300 p-3.5 rounded-2xl transition flex flex-col justify-between gap-3 shadow-2xs';
+        card.innerHTML = `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-mono font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                  ${esc(f.airlineCode)}
+                </span>
+                <div class="min-w-0">
+                  <h4 class="font-bold text-xs text-slate-900 truncate">${esc(f.airline)}</h4>
+                  <p class="text-[10px] text-slate-500 font-mono">${esc(f.code)} · ${esc(f.country || '')}</p>
+                </div>
+              </div>
+              <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-md ${f.stops === 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                ${f.stops === 0 ? '🟢 บินตรง' : '🟡 ต่อเครื่อง'}
+              </span>
+            </div>
+
+            <div class="bg-white/80 border border-slate-100 rounded-xl p-2.5 flex items-center justify-between text-xs">
+              <div>
+                <div class="font-extrabold text-slate-800 text-xs">${esc(f.from)} ➔ ${esc(f.to)}</div>
+                <div class="text-[10px] text-slate-500">${esc(f.destName || f.to)}</div>
+              </div>
+              <div class="text-right">
+                <div class="font-bold text-slate-700 text-xs">🛫 ${esc(f.dep)} - ${esc(f.arr)} น.</div>
+                <div class="text-[10px] text-slate-400">⏱️ ${Math.floor(f.duration/60)}ชม. ${f.duration%60}น. · ✈️ ${esc(f.aircraft || 'A350')}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-200/60">
+            <div>
+              <span class="text-[10px] text-slate-400">ราคาเริ่มต้น</span>
+              <div class="text-sky-600 font-black text-sm md:text-base">฿${fmt(f.price)}</div>
+            </div>
+            <button class="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer"
+              onclick="bookFlightFromDirectory(${f.id})">
+              จองเที่ยวบิน ➔
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterFlightsDirectory() {
+      const q = ($('searchFlightInput')?.value || '').trim().toLowerCase();
+      const region = $('filterRegionSelect')?.value || 'all';
+      const stops = $('filterStopsSelect')?.value || 'all';
+
+      let filtered = [...allFlightsCache];
+
+      if (q) {
+        filtered = filtered.filter(f =>
+          f.code.toLowerCase().includes(q) ||
+          f.airline.toLowerCase().includes(q) ||
+          f.airlineCode.toLowerCase().includes(q) ||
+          f.to.toLowerCase().includes(q) ||
+          (f.destName && f.destName.toLowerCase().includes(q)) ||
+          (f.destEn && f.destEn.toLowerCase().includes(q))
+        );
+      }
+
+      if (region && region !== 'all') {
+        filtered = filtered.filter(f => f.region === region.toLowerCase());
+      }
+
+      if (stops === 'direct') {
+        filtered = filtered.filter(f => f.stops === 0);
+      } else if (stops === 'transit') {
+        filtered = filtered.filter(f => f.stops > 0);
+      }
+
+      renderFlightsGrid(filtered);
+    }
+
+    function bookFlightFromDirectory(flightId) {
+      const targetFlight = allFlightsCache.find(f => f.id === flightId);
+      if (!targetFlight) return;
+      closeFlightsModal();
+      openConfirm({
+        ...targetFlight,
+        route: targetFlight.from + ' ➔ ' + targetFlight.to + ' (' + (targetFlight.destName || targetFlight.to) + ')'
+      });
+    }
+
+    // Preload flights in background
+    loadFlightsDirectory();
 
     function selectAirlineFromDirectory(code, name) {
       closeAirlinesModal();

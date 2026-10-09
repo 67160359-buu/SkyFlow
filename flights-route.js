@@ -30,6 +30,53 @@ router.get('/airlines', (req, res) => {
   });
 });
 
+// API Endpoint: Get All 200 Popular Flights Master Catalog
+router.get('/flights/all', (req, res) => {
+  const { q = '', region = '', direct = '', airline = '', maxPrice = '' } = req.query;
+  const allMasterFlights = generate200Flights('BKK', 'ALL');
+
+  let result = [...allMasterFlights];
+
+  if (q) {
+    const query = q.toLowerCase();
+    result = result.filter(f =>
+      f.code.toLowerCase().includes(query) ||
+      f.airline.toLowerCase().includes(query) ||
+      f.airlineCode.toLowerCase().includes(query) ||
+      f.to.toLowerCase().includes(query) ||
+      (f.destName && f.destName.toLowerCase().includes(query)) ||
+      (f.destEn && f.destEn.toLowerCase().includes(query)) ||
+      (f.country && f.country.toLowerCase().includes(query))
+    );
+  }
+
+  if (region && region !== 'all') {
+    result = result.filter(f => f.region === region.toLowerCase());
+  }
+
+  if (airline) {
+    const aQuery = airline.toLowerCase();
+    result = result.filter(f =>
+      f.airline.toLowerCase().includes(aQuery) ||
+      f.airlineCode.toLowerCase() === aQuery
+    );
+  }
+
+  if (direct === 'true' || direct === '1') {
+    result = result.filter(f => f.stops === 0);
+  }
+
+  if (maxPrice && !isNaN(Number(maxPrice))) {
+    result = result.filter(f => f.price <= Number(maxPrice));
+  }
+
+  res.json({
+    total: allMasterFlights.length,
+    count: result.length,
+    flights: result
+  });
+});
+
 // API Endpoint: Get 200 Flights for requested route & date
 router.get('/flights', async (req, res) => {
   let { from = 'BKK', to = 'SIN', date = '', airline = '', direct = '' } = req.query;

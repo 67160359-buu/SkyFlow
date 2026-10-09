@@ -1,4 +1,4 @@
-// ==============================================================================
+﻿// ==============================================================================
 // SkyFlow - 200 International & Domestic Airlines Master Data
 // ==============================================================================
 
@@ -239,37 +239,81 @@ const AIRCRAFT_TYPES = [
   'Airbus A380-800'
 ];
 
+// Popular destinations with realistic flight times and base pricing
+const POPULAR_DESTINATIONS = [
+  { code: 'NRT', nameTH: 'โตเกียว (นาริตะ)', nameEN: 'Tokyo', region: 'japan', duration: 375, basePrice: 8900 },
+  { code: 'HND', nameTH: 'โตเกียว (ฮาเนดะ)', nameEN: 'Tokyo', region: 'japan', duration: 370, basePrice: 9400 },
+  { code: 'KIX', nameTH: 'โอซาก้า', nameEN: 'Osaka', region: 'japan', duration: 345, basePrice: 8500 },
+  { code: 'CTS', nameTH: 'ซัปโปโร', nameEN: 'Sapporo', region: 'japan', duration: 410, basePrice: 10500 },
+  { code: 'FUK', nameTH: 'ฟุกุโอกะ', nameEN: 'Fukuoka', region: 'japan', duration: 320, basePrice: 7900 },
+  { code: 'ICN', nameTH: 'โซล (อินชอน)', nameEN: 'Seoul', region: 'korea', duration: 335, basePrice: 7500 },
+  { code: 'PUS', nameTH: 'ปูซาน', nameEN: 'Busan', region: 'korea', duration: 325, basePrice: 7200 },
+  { code: 'SIN', nameTH: 'สิงคโปร์', nameEN: 'Singapore', region: 'asia', duration: 145, basePrice: 3200 },
+  { code: 'HKG', nameTH: 'ฮ่องกง', nameEN: 'Hong Kong', region: 'asia', duration: 170, basePrice: 4200 },
+  { code: 'TPE', nameTH: 'ไทเป', nameEN: 'Taipei', region: 'asia', duration: 225, basePrice: 5100 },
+  { code: 'KUL', nameTH: 'กัวลาลัมเปอร์', nameEN: 'Kuala Lumpur', region: 'asia', duration: 130, basePrice: 2800 },
+  { code: 'DPS', nameTH: 'บาหลี', nameEN: 'Bali', region: 'asia', duration: 260, basePrice: 4800 },
+  { code: 'HAN', nameTH: 'ฮานอย', nameEN: 'Hanoi', region: 'asia', duration: 110, basePrice: 2600 },
+  { code: 'SGN', nameTH: 'โฮจิมินห์', nameEN: 'Ho Chi Minh', region: 'asia', duration: 95, basePrice: 2400 },
+  { code: 'DXB', nameTH: 'ดูไบ', nameEN: 'Dubai', region: 'mideast', duration: 400, basePrice: 11200 },
+  { code: 'LHR', nameTH: 'ลอนดอน (ฮีทโธรว์)', nameEN: 'London', region: 'europe', duration: 740, basePrice: 19800 },
+  { code: 'CDG', nameTH: 'ปารีส (ชาร์ล เดอ โกล)', nameEN: 'Paris', region: 'europe', duration: 730, basePrice: 19500 },
+  { code: 'FRA', nameTH: 'แฟรงก์เฟิร์ต', nameEN: 'Frankfurt', region: 'europe', duration: 715, basePrice: 19200 },
+  { code: 'ZRH', nameTH: 'ซูริก', nameEN: 'Zurich', region: 'europe', duration: 725, basePrice: 20500 },
+  { code: 'SYD', nameTH: 'ซิดนีย์', nameEN: 'Sydney', region: 'oceania', duration: 550, basePrice: 16500 },
+  { code: 'MEL', nameTH: 'เมลเบิร์น', nameEN: 'Melbourne', region: 'oceania', duration: 540, basePrice: 16200 },
+  { code: 'CNX', nameTH: 'เชียงใหม่', nameEN: 'Chiang Mai', region: 'domestic', duration: 75, basePrice: 1450 },
+  { code: 'HKT', nameTH: 'ภูเก็ต', nameEN: 'Phuket', region: 'domestic', duration: 85, basePrice: 1650 },
+  { code: 'KBV', nameTH: 'กระบี่', nameEN: 'Krabi', region: 'domestic', duration: 80, basePrice: 1550 },
+  { code: 'USM', nameTH: 'เกาะสมุย', nameEN: 'Samui', region: 'domestic', duration: 65, basePrice: 2950 },
+  { code: 'CEI', nameTH: 'เชียงราย', nameEN: 'Chiang Rai', region: 'domestic', duration: 85, basePrice: 1590 },
+  { code: 'HDY', nameTH: 'หาดใหญ่', nameEN: 'Hat Yai', region: 'domestic', duration: 90, basePrice: 1690 },
+];
+
 /**
  * Generate 200 distinct, realistic flights across all 200 airlines.
- * Each flight is mapped to one unique airline from the 200 airlines list.
+ * Supports specific route or distributed master catalog across top destinations.
  */
 function generate200Flights(from = 'BKK', to = 'SIN', date = '') {
   const baseDate = date || new Date().toISOString().split('T')[0];
+  const isAllRoutes = !to || to.toUpperCase() === 'ALL';
 
   return AIRLINES.map((air, index) => {
+    const dest = isAllRoutes
+      ? POPULAR_DESTINATIONS[index % POPULAR_DESTINATIONS.length]
+      : (POPULAR_DESTINATIONS.find(d => d.code === to.toUpperCase()) || {
+          code: to.toUpperCase(),
+          nameTH: to.toUpperCase(),
+          nameEN: to.toUpperCase(),
+          region: 'international',
+          duration: 160,
+          basePrice: 3800
+        });
+
     // Distribute departure times across 24 hours (every 7 minutes)
     const totalMinutes = (index * 7 + 360) % 1440; // Starts from 06:00
     const depH = Math.floor(totalMinutes / 60);
     const depM = totalMinutes % 60;
-    const depTime = `${String(depH).padStart(2, '0')}:${String(depM).padStart(2, '0')}`;
+    const depTime = String(depH).padStart(2, '0') + ':' + String(depM).padStart(2, '0');
 
-    // Duration between 75m to 380m depending on index
-    const duration = 80 + ((index * 13) % 240);
+    // Duration with slight variance
+    const duration = Math.max(60, dest.duration + ((index * 3) % 25) - 10);
     const arrTotalMinutes = (totalMinutes + duration) % 1440;
     const arrH = Math.floor(arrTotalMinutes / 60);
     const arrM = arrTotalMinutes % 60;
-    const arrTime = `${String(arrH).padStart(2, '0')}:${String(arrM).padStart(2, '0')}`;
+    const arrTime = String(arrH).padStart(2, '0') + ':' + String(arrM).padStart(2, '0');
 
-    // Stops: 70% direct flights, 30% 1-stop connecting
-    const stops = index % 3 === 0 && index > 15 ? 1 : 0;
+    // Stops: 75% direct flights, 25% 1-stop connecting
+    const stops = index % 4 === 0 && index > 10 ? 1 : 0;
 
     // Flight number
     const flightNum = 100 + ((index * 23 + 17) % 890);
-    const flightCode = `${air.code} ${flightNum}`;
+    const flightCode = air.code + ' ' + flightNum;
 
-    // Price: realistic pricing with market variance (1,490 THB - 19,800 THB)
-    const basePrice = stops === 0 ? 1990 + (index * 65) : 3400 + (index * 80);
-    const price = Math.round(basePrice / 10) * 10;
+    // Price: realistic pricing with market variance
+    const stopMultiplier = stops === 0 ? 1.0 : 0.85;
+    const variance = ((index * 47) % 800) - 300;
+    const calcPrice = Math.max(990, Math.round((dest.basePrice * stopMultiplier + variance) / 10) * 10);
 
     // Aircraft model
     const aircraft = AIRCRAFT_TYPES[index % AIRCRAFT_TYPES.length];
@@ -282,12 +326,16 @@ function generate200Flights(from = 'BKK', to = 'SIN', date = '') {
       rating: air.rating,
       code: flightCode,
       from: from.toUpperCase(),
-      to: to.toUpperCase(),
+      to: dest.code,
+      destName: dest.nameTH,
+      destEn: dest.nameEN,
+      region: dest.region,
+      route: from.toUpperCase() + ' ➔ ' + dest.code,
       dep: depTime,
       arr: arrTime,
       duration,
       stops,
-      price,
+      price: calcPrice,
       aircraft,
       date: baseDate
     };
@@ -296,5 +344,6 @@ function generate200Flights(from = 'BKK', to = 'SIN', date = '') {
 
 module.exports = {
   AIRLINES,
+  POPULAR_DESTINATIONS,
   generate200Flights
 };
