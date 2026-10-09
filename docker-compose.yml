@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: skyflow-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: skyflowpass
+      POSTGRES_DB: skyflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - skyflow_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d skyflow_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: skyflow-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: skyflowpass
+      DB_NAME: skyflow_db
+      JWT_SECRET: skyflow_secret_key_2024
+      FLIGHTAPI_KEY: 6ac915800d589104633ed86f
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  skyflow_pgdata:
