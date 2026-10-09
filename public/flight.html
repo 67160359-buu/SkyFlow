@@ -775,6 +775,7 @@
         <div class="flex items-center gap-2 flex-wrap">
           <span class="font-bold text-slate-900 text-sm">${esc(f.airline)}</span>
           <span class="text-[11px] bg-slate-200/80 text-slate-600 px-2 py-0.5 rounded-md font-mono">${esc(f.code)}</span>
+          ${f.isLive ? '<span class="text-[10px] bg-sky-100 text-sky-700 font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs">🌐 ข้อมูลสด FlightAPI</span>' : ''}
           ${f.stops === 0 ? '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md font-bold">บินตรง</span>' : '<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md font-bold">ต่อเครื่อง</span>'}
           ${f.aircraft ? `<span class="text-[10px] bg-slate-200/50 text-slate-500 px-1.5 py-0.5 rounded">✈️ ${esc(f.aircraft)}</span>` : ''}
           ${f.country ? `<span class="text-[10px] text-slate-400">(${esc(f.country)})</span>` : ''}

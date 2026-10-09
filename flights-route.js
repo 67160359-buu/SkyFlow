@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const { AIRLINES, generate200Flights } = require('./airlines-data');
 
@@ -88,7 +88,7 @@ router.get('/flights', async (req, res) => {
     date = new Date().toISOString().split('T')[0];
   }
 
-  const key = process.env.FLIGHTAPI_KEY || '6abe10cfe1ceafff6e5b16d3';
+  const key = process.env.FLIGHTAPI_KEY || '6ac900bf907a7ecb4f1f9a87';
   const ck = `${from}-${to}-${date}`;
 
   // Check in-memory cache first
@@ -142,7 +142,8 @@ router.get('/flights', async (req, res) => {
             price: Math.round(price),
             from,
             to,
-            date
+            date,
+            isLive: true
           };
         }).filter(Boolean);
 
