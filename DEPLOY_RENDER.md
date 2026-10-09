@@ -44,7 +44,7 @@ git commit -m "feat: SkyFlow ready for Render.com deployment"
 git branch -M main
 
 # 5. เชื่อมต่อกับ GitHub Repo ของคุณ (สร้าง repo ใหม่บน github.com ก่อน)
-git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/skyflow-app.git
+git remote add origin https://github.com/67160359-buu/SkyFlow.git
 
 # 6. Push โค้ดขึ้น GitHub
 git push -u origin main

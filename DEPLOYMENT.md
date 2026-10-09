@@ -71,7 +71,7 @@ sudo usermod -aG docker $USER
 
 ### ขั้นตอนที่ 2: โคลนโค้ดและตั้งค่าตัวแปรระบบ
 ```bash
-git clone <URL_REPOSITORY_ของท่าน> skyflow-app
+git clone https://github.com/67160359-buu/SkyFlow.git skyflow-app
 cd skyflow-app
 
 # คัดลอกและแก้ไขไฟล์ .env
