@@ -88,7 +88,7 @@ router.get('/flights', async (req, res) => {
     date = new Date().toISOString().split('T')[0];
   }
 
-  const key = process.env.FLIGHTAPI_KEY || '6ac900bf907a7ecb4f1f9a87';
+  const key = process.env.FLIGHTAPI_KEY || '6ac915800d589104633ed86f';
   const ck = `${from}-${to}-${date}`;
 
   // Check in-memory cache first

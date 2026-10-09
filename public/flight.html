@@ -498,11 +498,13 @@
       class="bg-white max-w-5xl w-full rounded-3xl p-6 md:p-7 shadow-2xl space-y-4 border border-slate-100 relative animate-pop max-h-[92vh] flex flex-col">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-sky-200">
+          <div
+            class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-sky-200">
             🛫</div>
           <div>
             <h3 class="font-bold text-base text-slate-900">ตาราง 200 เที่ยวบินยอดนิยม (200 Flights Directory)</h3>
-            <p class="text-xs text-slate-500">เที่ยวบินครอบคลุม 200 สายการบินพันธมิตรทั่วโลก บินตรงและต่อเครื่อง ค้นหา กรอง และเลือกจองได้ทันที</p>
+            <p class="text-xs text-slate-500">เที่ยวบินครอบคลุม 200 สายการบินพันธมิตรทั่วโลก บินตรงและต่อเครื่อง ค้นหา
+              กรอง และเลือกจองได้ทันที</p>
           </div>
         </div>
         <button onclick="closeFlightsModal()"
@@ -537,7 +539,8 @@
           <option value="transit">🟡 ต่อเครื่อง</option>
         </select>
 
-        <span id="flightCountBadge" class="bg-sky-50 text-sky-700 font-bold px-3 py-2 rounded-xl text-xs whitespace-nowrap text-center">
+        <span id="flightCountBadge"
+          class="bg-sky-50 text-sky-700 font-bold px-3 py-2 rounded-xl text-xs whitespace-nowrap text-center">
           200 เที่ยวบิน
         </span>
       </div>
@@ -569,15 +572,18 @@
 
       <!-- Search Airlines Input -->
       <div class="flex items-center gap-2">
-        <input id="searchAirlineInput" type="text" oninput="filterAirlinesDirectory()" placeholder="พิมพ์ค้นหาชื่อสายการบิน, รหัส IATA (เช่น TG, SQ, JL, EK) หรือประเทศ..."
+        <input id="searchAirlineInput" type="text" oninput="filterAirlinesDirectory()"
+          placeholder="พิมพ์ค้นหาชื่อสายการบิน, รหัส IATA (เช่น TG, SQ, JL, EK) หรือประเทศ..."
           class="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition bg-slate-50">
-        <span id="airlineCountBadge" class="bg-sky-50 text-sky-700 font-bold px-3 py-2 rounded-xl text-xs whitespace-nowrap">
+        <span id="airlineCountBadge"
+          class="bg-sky-50 text-sky-700 font-bold px-3 py-2 rounded-xl text-xs whitespace-nowrap">
           200 สายการบิน
         </span>
       </div>
 
       <!-- Airlines Grid Container -->
-      <div id="airlinesGrid" class="overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pr-1 max-h-[60vh]">
+      <div id="airlinesGrid"
+        class="overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pr-1 max-h-[60vh]">
         <!-- Dynamically rendered via JS -->
       </div>
     </div>
@@ -587,20 +593,67 @@
     /* ---------- Config & Master Data ---------- */
     const ORIGIN = 'BKK';
     const AIRPORT_LIST = [
+      // --- ไทย (Thailand) ---
       ['CNX', 'เชียงใหม่', 'Chiang Mai'], ['HKT', 'ภูเก็ต', 'Phuket'], ['KBV', 'กระบี่', 'Krabi'], ['HDY', 'หาดใหญ่|สงขลา', 'Hat Yai'],
       ['CEI', 'เชียงราย', 'Chiang Rai'], ['KKC', 'ขอนแก่น', 'Khon Kaen'], ['UTH', 'อุดรธานี|อุดร', 'Udon Thani'], ['USM', 'เกาะสมุย|สมุย', 'Samui'],
       ['URT', 'สุราษฎร์ธานี|สุราษฎร์', 'Surat Thani'], ['NST', 'นครศรีธรรมราช|นครศรี', 'Nakhon Si Thammarat'], ['UBP', 'อุบลราชธานี|อุบล', 'Ubon Ratchathani'],
       ['TST', 'ตรัง', 'Trang'], ['PHS', 'พิษณุโลก', 'Phitsanulok'], ['LPT', 'ลำปาง', 'Lampang'], ['TDX', 'ตราด', 'Trat'], ['UTP', 'พัทยา|ระยอง|อู่ตะเภา', 'U-Tapao'],
-      ['DMK', 'ดอนเมือง', 'Don Mueang'],
-      ['NRT', 'โตเกียว|ญี่ปุ่น|นาริตะ', 'Tokyo'], ['HND', 'ฮาเนดะ', 'Haneda'], ['KIX', 'โอซาก้า|โอซากา', 'Osaka'], ['FUK', 'ฟุกุโอกะ', 'Fukuoka'],
-      ['CTS', 'ซัปโปโร|ฮอกไกโด', 'Sapporo'], ['NGO', 'นาโกย่า', 'Nagoya'], ['ICN', 'โซล|เกาหลี|อินชอน', 'Seoul'], ['PUS', 'ปูซาน', 'Busan'],
-      ['SIN', 'สิงคโปร์', 'Singapore'], ['KUL', 'กัวลาลัมเปอร์', 'Kuala Lumpur'], ['HKG', 'ฮ่องกง', 'Hong Kong'], ['TPE', 'ไทเป|ไต้หวัน', 'Taipei'],
-      ['PEK', 'ปักกิ่ง', 'Beijing'], ['PVG', 'เซี่ยงไฮ้', 'Shanghai'], ['CAN', 'กว่างโจว', 'Guangzhou'], ['SGN', 'โฮจิมินห์|ไซง่อน|เวียดนาม', 'Ho Chi Minh'],
-      ['HAN', 'ฮานอย', 'Hanoi'], ['DAD', 'ดานัง', 'Da Nang'], ['REP', 'เสียมเรียบ', 'Siem Reap'], ['PNH', 'พนมเปญ', 'Phnom Penh'], ['RGN', 'ย่างกุ้ง', 'Yangon'],
-      ['DPS', 'บาหลี', 'Bali'], ['CGK', 'จาการ์ตา', 'Jakarta'], ['MNL', 'มะนิลา', 'Manila'], ['DEL', 'เดลี', 'Delhi'], ['BOM', 'มุมไบ', 'Mumbai'],
-      ['DXB', 'ดูไบ', 'Dubai'], ['MLE', 'มัลดีฟส์|มัลดีฟ', 'Maldives'], ['IST', 'อิสตันบูล', 'Istanbul'], ['LHR', 'ลอนดอน', 'London'], ['CDG', 'ปารีส', 'Paris'],
-      ['FRA', 'แฟรงก์เฟิร์ต', 'Frankfurt'], ['SYD', 'ซิดนีย์', 'Sydney'], ['MEL', 'เมลเบิร์น', 'Melbourne'], ['LAX', 'ลอสแอนเจลิส', 'Los Angeles'], ['JFK', 'นิวยอร์ก', 'New York'],
-      ['ZRH', 'ซูริก|ซูริค|สวิตเซอร์แลนด์', 'Zurich'], ['AMS', 'อัมสเตอร์ดัม', 'Amsterdam'], ['FCO', 'โรม|อิตาลี', 'Rome'], ['MAD', 'มาดริด', 'Madrid']
+      ['DMK', 'ดอนเมือง', 'Don Mueang'], ['BKK', 'สุวรรณภูมิ|กรุงเทพ', 'Suvarnabhumi'],
+
+      // --- เอเชียตะวันออกเฉียงใต้ (Southeast Asia) ---
+      ['SIN', 'สิงคโปร์', 'Singapore'], ['KUL', 'กัวลาลัมเปอร์', 'Kuala Lumpur'], ['PEN', 'ปีนัง', 'Penang'], ['BKI', 'โคตาคินาบาลู', 'Kota Kinabalu'],
+      ['SGN', 'โฮจิมินห์|ไซง่อน|เวียดนาม', 'Ho Chi Minh'], ['HAN', 'ฮานอย', 'Hanoi'], ['DAD', 'ดานัง', 'Da Nang'], ['CXR', 'ญาจาง|นาตรัง', 'Nha Trang'],
+      ['PQC', 'เกาะฟู้โกว๊ก|ฟู้โกว๊ก', 'Phu Quoc'], ['REP', 'เสียมเรียบ', 'Siem Reap'], ['PNH', 'พนมเปญ', 'Phnom Penh'], ['RGN', 'ย่างกุ้ง', 'Yangon'],
+      ['MDL', 'มัณฑะเลย์', 'Mandalay'], ['LPQ', 'หลวงพระบาง', 'Luang Prabang'], ['VTE', 'เวียงจันทน์', 'Vientiane'], ['DPS', 'บาหลี', 'Bali'],
+      ['CGK', 'จาการ์ตา', 'Jakarta'], ['SUB', 'สุราบายา', 'Surabaya'], ['MNL', 'มะนิลา', 'Manila'], ['CEB', 'เซบู', 'Cebu'],
+      ['BWN', 'บรูไน', 'Brunei'],
+
+      // --- เอเชียตะวันออก (East Asia) ---
+      ['NRT', 'โตเกียว|ญี่ปุ่น|นาริตะ', 'Tokyo Narita'], ['HND', 'ฮาเนดะ|โตเกียวฮาเนดะ', 'Tokyo Haneda'], ['KIX', 'โอซาก้า|โอซากา', 'Osaka Kansai'],
+      ['FUK', 'ฟุกุโอกะ', 'Fukuoka'], ['CTS', 'ซัปโปโร|ฮอกไกโด', 'Sapporo Chitose'], ['NGO', 'นาโกย่า', 'Nagoya'], ['OKA', 'โอกินาวา|โอกินาวะ', 'Okinawa'],
+      ['KOJ', 'คาโกชิมะ', 'Kagoshima'], ['KMJ', 'คุมาโมโตะ', 'Kumamoto'], ['ICN', 'โซล|เกาหลี|อินชอน', 'Seoul Incheon'], ['GMP', 'กิมโป|โซลกิมโป', 'Seoul Gimpo'],
+      ['PUS', 'ปูซาน', 'Busan'], ['CJU', 'เชจู|เกาะเชจู', 'Jeju'], ['HKG', 'ฮ่องกง', 'Hong Kong'], ['MFM', 'มาเก๊า', 'Macau'],
+      ['TPE', 'ไทเป|ไต้หวัน', 'Taipei Taoyuan'], ['TSA', 'ไทเปซงซาน', 'Taipei Songshan'], ['KHH', 'เกาสยง', 'Kaohsiung'], ['PEK', 'ปักกิ่ง', 'Beijing Capital'],
+      ['PKX', 'ปักกิ่งต้าซิง', 'Beijing Daxing'], ['PVG', 'เซี่ยงไฮ้', 'Shanghai Pudong'], ['SHA', 'เซี่ยงไฮ้หงเฉียว', 'Shanghai Hongqiao'],
+      ['CAN', 'กว่างโจว', 'Guangzhou'], ['SZX', 'เซินเจิ้น', 'Shenzhen'], ['CTU', 'เฉิงตู', 'Chengdu'], ['CKG', 'ฉงชิ่ง', 'Chongqing'],
+      ['KMG', 'คุนหมิง', 'Kunming'], ['XMN', 'เซี่ยเหมิน', 'Xiamen'], ['ULN', 'อูลานบาตาร์|มองโกเลีย', 'Ulaanbaatar'],
+
+      // --- เอเชียใต้ (South Asia) ---
+      ['DEL', 'เดลี|นิวเดลี|อินเดีย', 'Delhi'], ['BOM', 'มุมไบ', 'Mumbai'], ['MAA', 'เจนไน', 'Chennai'], ['CCU', 'โกลกาตา', 'Kolkata'],
+      ['BLR', 'เบงกาลูรู|บังคาลอร์', 'Bengaluru'], ['COK', 'โคชิน', 'Cochin'], ['KTM', 'กาฐมาณฑุ|เนปาล', 'Kathmandu'], ['CMB', 'โคลัมโบ|ศรีลังกา', 'Colombo'],
+      ['MLE', 'มัลดีฟส์|มัลดีฟ', 'Maldives'], ['DAC', 'ดากา|บังกลาเทศ', 'Dhaka'], ['PBH', 'พาโร|ภูฏาน', 'Paro'],
+
+      // --- ตะวันออกกลาง (Middle East) ---
+      ['DXB', 'ดูไบ|ยูเออี', 'Dubai'], ['AUH', 'อาบูดาบี', 'Abu Dhabi'], ['DOH', 'โดฮา|กาตาร์', 'Doha'], ['MCT', 'มัสกัต|โอมาน', 'Muscat'],
+      ['RUH', 'ริยาด|ซาอุดีอาระเบีย', 'Riyadh'], ['JED', 'เจดดาห์', 'Jeddah'], ['KWI', 'คูเวต', 'Kuwait'], ['BAH', 'บาห์เรน', 'Bahrain'],
+      ['AMM', 'อัมมาน|จอร์แดน', 'Amman'], ['TLV', 'เทลอาวีฟ|อิสราเอล', 'Tel Aviv'],
+
+      // --- ยุโรป (Europe) ---
+      ['LHR', 'ลอนดอน|อังกฤษ|ฮีทโธรว์', 'London Heathrow'], ['LGW', 'ลอนดอนแกตวิก', 'London Gatwick'], ['CDG', 'ปารีส|ฝรั่งเศส', 'Paris Charles de Gaulle'],
+      ['FRA', 'แฟรงก์เฟิร์ต|เยอรมนี', 'Frankfurt'], ['MUC', 'มิวนิก', 'Munich'], ['BER', 'เบอร์ลิน', 'Berlin'], ['AMS', 'อัมสเตอร์ดัม|เนเธอร์แลนด์', 'Amsterdam'],
+      ['ZRH', 'ซูริก|ซูริค|สวิตเซอร์แลนด์', 'Zurich'], ['GVA', 'เจนีวา', 'Geneva'], ['VIE', 'เวียนนา|ออสเตรีย', 'Vienna'], ['FCO', 'โรม|อิตาลี', 'Rome Fiumicino'],
+      ['MXP', 'มิลาน', 'Milan Malpensa'], ['MAD', 'มาดริด|สเปน', 'Madrid'], ['BCN', 'บาร์เซโลนา', 'Barcelona'], ['LIS', 'ลิสบอน|โปรตุเกส', 'Lisbon'],
+      ['CPH', 'โคเปนเฮเกน|เดนมาร์ก', 'Copenhagen'], ['ARN', 'สต็อกโฮล์ม|สวีเดน', 'Stockholm'], ['OSL', 'ออสโล|นอร์เวย์', 'Oslo'], ['HEL', 'เฮลซิงกิ|ฟินแลนด์', 'Helsinki'],
+      ['IST', 'อิสตันบูล|ตุรกี', 'Istanbul'], ['ATH', 'เอเธนส์|กรีซ', 'Athens'], ['PRG', 'ปราก|เช็ก', 'Prague'], ['BUD', 'บูดาเปสต์|ฮังการี', 'Budapest'],
+      ['WAW', 'วอร์ซอ|โปแลนด์', 'Warsaw'], ['DUB', 'ดับลิน|ไอร์แลนด์', 'Dublin'], ['EDIN', 'เอดินบะระ|สกอตแลนด์', 'Edinburgh'], ['SVO', 'มอสโก|รัสเซีย', 'Moscow Sheremetyevo'],
+
+      // --- อเมริกาเหนือ (North America) ---
+      ['LAX', 'ลอสแอนเจลิส|แอลเอ|อเมริกา', 'Los Angeles'], ['JFK', 'นิวยอร์ก|นิวยอร์กเจเอฟเค', 'New York JFK'], ['EWR', 'นวร์ก|นิวยอร์กนวร์ก', 'Newark'],
+      ['SFO', 'ซานฟรานซิสโก', 'San Francisco'], ['SEA', 'ซีแอตเทิล', 'Seattle'], ['ORD', 'ชิคาโก', 'Chicago O\'Hare'], ['DFW', 'ดัลลัส', 'Dallas Fort Worth'],
+      ['MIA', 'ไมอามี', 'Miami'], ['LAS', 'ลาสเวกัส', 'Las Vegas'], ['HNL', 'โฮโนลูลู|ฮาวาย', 'Honolulu'], ['YYZ', 'โทรอนโต|แคนาดา', 'Toronto'],
+      ['YVR', 'แวนคูเวอร์', 'Vancouver'], ['YUL', 'มอนทรีออล', 'Montreal'], ['MEX', 'เม็กซิโกซิตี้|เม็กซิโก', 'Mexico City'],
+
+      // --- ออสเตรเลีย / โอเชียเนีย (Australia & Oceania) ---
+      ['SYD', 'ซิดนีย์|ออสเตรเลีย', 'Sydney'], ['MEL', 'เมลเบิร์น', 'Melbourne'], ['BNE', 'บริสเบน', 'Brisbane'], ['PER', 'เพิร์ธ', 'Perth'],
+      ['ADL', 'อดิเลด', 'Adelaide'], ['AKL', 'ออกแลนด์|นิวซีแลนด์', 'Auckland'], ['CHC', 'ไครสต์เชิร์ช', 'Christchurch'], ['NAN', 'ฟิจิ', 'Fiji'],
+
+      // --- อเมริกาใต้ (South America) ---
+      ['GRU', 'เซาเปาโล|บราซิล', 'Sao Paulo'], ['GIG', 'ริโอเดจาเนโร', 'Rio de Janeiro'], ['EZE', 'บัวโนสไอเรส|อาร์เจนตินา', 'Buenos Aires'],
+      ['SCL', 'ซานติอาโก|ชิลี', 'Santiago'], ['BOG', 'โบโกตา|โคลอมเบีย', 'Bogota'], ['LIM', 'ลิมา|เปรู', 'Lima'],
+
+      // --- แอฟริกา (Africa) ---
+      ['CAI', 'ไคโร|อียิปต์', 'Cairo'], ['JNB', 'โยฮันเนสเบิร์ก|แอฟริกาใต้', 'Johannesburg'], ['CPT', 'เคปทาวน์', 'Cape Town'],
+      ['CMN', 'คาซาบลังกา|โมร็อกโก', 'Casablanca'], ['NBO', 'ไนโรบี|เคนยา', 'Nairobi'], ['ADD', 'อัดดิสอาบาบา|เอธิโอเปีย', 'Addis Ababa'], ['MRU', 'มอริเชียส', 'Mauritius']
     ];
 
     function resolveAirport(text) {
@@ -781,7 +834,7 @@
           ${f.country ? `<span class="text-[10px] text-slate-400">(${esc(f.country)})</span>` : ''}
         </div>
         <div class="text-xs text-slate-600 font-medium">
-          🛫 เวลา ${esc(f.dep)} - ${esc(f.arr)} น. (${f.duration ? Math.floor(f.duration/60) + 'ชม. ' + (f.duration%60) + 'น.' : '2 ชม.'})
+          🛫 เวลา ${esc(f.dep)} - ${esc(f.arr)} น. (${f.duration ? Math.floor(f.duration / 60) + 'ชม. ' + (f.duration % 60) + 'น.' : '2 ชม.'})
         </div>
       </div>
       <div class="flex items-center justify-between md:justify-end w-full md:w-auto gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-200/60">
@@ -1506,7 +1559,7 @@
               </div>
               <div class="text-right">
                 <div class="font-bold text-slate-700 text-xs">🛫 ${esc(f.dep)} - ${esc(f.arr)} น.</div>
-                <div class="text-[10px] text-slate-400">⏱️ ${Math.floor(f.duration/60)}ชม. ${f.duration%60}น. · ✈️ ${esc(f.aircraft || 'A350')}</div>
+                <div class="text-[10px] text-slate-400">⏱️ ${Math.floor(f.duration / 60)}ชม. ${f.duration % 60}น. · ✈️ ${esc(f.aircraft || 'A350')}</div>
               </div>
             </div>
           </div>
